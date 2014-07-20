@@ -1,0 +1,130 @@
+﻿<Window x:Class="ScammerAlert.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ScammerAlert.converters"
+        
+        Title="Game Item Scammer Alerter" Height="350" Width="221" Loaded="Window_Loaded" WindowStyle="None" Closing="Window_Closing" ResizeMode="NoResize" LocationChanged="Window_LocationChanged" Icon="icon/icon.ico" Background="{x:Null}"  >
+
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="brushWatermarkBackground" Color="White" />
+        <SolidColorBrush x:Key="brushWatermarkForeground" Color="LightSteelBlue" />
+        <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:TextInputToVisibilityConverter x:Key="TextInputToVisibilityConverter" />
+
+        <Style x:Key="EntryFieldStyle" TargetType="Grid" >
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="20,0" />
+        </Style>
+
+    </Window.Resources>
+    <Border  Background="#FF3F3F46" >
+        <Grid>
+            <Grid Height="320" Width="215" VerticalAlignment="Bottom" Margin="0,0,0,2" Background="#FF302E2E"  >
+
+        <Label Content="Status:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblStatus" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" FontSize="48" Foreground="#FF55B44C" Padding="15" />
+        <Label x:Name="lblShowScammers" Content="Show scammers" HorizontalAlignment="Center" Height="23" Margin="0,75,0,0" VerticalAlignment="Top" Width="Auto" FontWeight="Bold" MouseUp="Label_MouseUp" Visibility="Collapsed"/>
+        <TextBlock x:Name="tbInfo" TextWrapping="WrapWithOverflow" Margin="10,94.843,10,132.157">There is currently no scammers identifyed in any active conversations or in your friends list</TextBlock>
+        <Image HorizontalAlignment="Center" Height="123" Margin="0,159,0,0" VerticalAlignment="Top" Width="120" Source="icon/icon_png.png" SnapsToDevicePixels="True" ClipToBounds="True"/>
+        <Button Content="Sign out" Width="65" Height="20" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalAlignment="Top" Margin="0,3,3,0" Padding="1,-1,1,1" Click="Button_Click_2"/>
+        <Button x:Name="buttonReport" Content="Report a scammer" HorizontalAlignment="Center" Margin="0,292,0,0" VerticalAlignment="Top" Width="121.323" Click="Button_Click_1" />
+
+
+
+        <Grid x:Name="ScammersListGrid" HorizontalAlignment="Stretch" Height="150" Margin="0,0,0,0" VerticalAlignment="Top" Background="#FF302E2E"  Visibility="Collapsed" >
+            <ListBox x:Name="lbScammers" HorizontalAlignment="Stretch" Height="120" VerticalAlignment="Top" SnapsToDevicePixels="True" DisplayMemberPath="Name" />
+            <Button Content="Hide" HorizontalAlignment="Center" Margin="0,0,0,4" VerticalAlignment="Bottom" Width="75" Height="20" VerticalContentAlignment="Center" Padding="1,-1,1,1" Click="Button_Click_3" />
+
+        </Grid>
+
+
+        <Grid x:Name="LoginOverlay" Background="#FF302E2E"   >
+            <Label Content="Log in" HorizontalAlignment="Center" Margin="0,35,0,0" VerticalAlignment="Top" FontSize="36" FontWeight="Bold"/>
+
+            <Grid Margin="0,98,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23"  Width="120" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
+                <TextBlock Margin="5,2" Text="Username" Foreground="{StaticResource brushWatermarkForeground}" >
+                    <TextBlock.Visibility>
+                        <MultiBinding Converter="{StaticResource TextInputToVisibilityConverter}">
+                            <Binding ElementName="txtUsername" Path="Text.IsEmpty" />
+                            <Binding ElementName="txtUsername" Path="IsFocused" />
+                        </MultiBinding>
+                    </TextBlock.Visibility>
+                </TextBlock>
+                <TextBox Name="txtUsername" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" />
+            </Grid>
+
+            <Grid Margin="0,135,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23"  Width="120" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
+                <TextBlock Margin="5,2" Text="Password" Foreground="{StaticResource brushWatermarkForeground}" >
+                    <TextBlock.Visibility>
+                        <MultiBinding Converter="{StaticResource TextInputToVisibilityConverter}">
+                            <Binding ElementName="txtPassword" Path="Password.IsEmpty" />
+                            <Binding ElementName="txtPassword" Path="IsFocused" />
+                        </MultiBinding>
+                    </TextBlock.Visibility>
+                </TextBlock>
+                <PasswordBox Name="txtPassword" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" />
+            </Grid>
+
+            <Grid x:Name="SteamGuardGrid" Margin="0,190,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="45"  Width="120" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" Visibility="Hidden" >
+                <TextBlock Margin="5,2" Text="CODE" Foreground="{StaticResource brushWatermarkForeground}" FontWeight="Bold" FontSize="28" VerticalAlignment="Center" >
+                    <TextBlock.Visibility>
+                        <MultiBinding Converter="{StaticResource TextInputToVisibilityConverter}">
+                            <Binding ElementName="txtPassword" Path="Password.IsEmpty" />
+                            <Binding ElementName="txtPassword" Path="IsFocused" />
+                        </MultiBinding>
+                    </TextBlock.Visibility>
+                </TextBlock>
+                <TextBox Name="txtSteamGuard" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" FontWeight="Bold" FontSize="28"  VerticalAlignment="Center" />
+            </Grid>
+
+
+            <Button x:Name="btnLogin" Content="Sign in" HorizontalAlignment="Center" Margin="0,245,0,0" VerticalAlignment="Top" Width="120" Height="30" FontWeight="Bold" FontSize="14" Click="Button_Click"/>
+            <Button Content="Report scammer offline" HorizontalAlignment="Center" Margin="0,0,0,8" VerticalAlignment="Bottom" Width="150" Height="20" Padding="1,-1,1,1" Click="Button_Click_4"/>
+
+
+
+        </Grid>
+
+        <Grid x:Name="ReportGrid" Height="170"  VerticalAlignment="Bottom" Background="#FF302E2E"  Visibility="Collapsed"  >
+            <Label Content="Report scammer" HorizontalAlignment="Center" Margin="0,5,0,0" VerticalAlignment="Top" />
+            <Label x:Name="btnCloseReport" Content="x" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" FontSize="22" FontFamily="Arial" MouseUp="btnCloseReport_MouseUp"/>
+            <Grid Margin="0,35,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23"  Width="160" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
+                <TextBlock Margin="5,2" Text="STEAM_0:X:XXXXXXXX" Foreground="{StaticResource brushWatermarkForeground}" >
+                    <TextBlock.Visibility>
+                        <MultiBinding Converter="{StaticResource TextInputToVisibilityConverter}">
+                            <Binding ElementName="txtSteamID" Path="Text.IsEmpty" />
+                            <Binding ElementName="txtSteamID" Path="IsFocused" />
+                        </MultiBinding>
+                    </TextBlock.Visibility>
+                </TextBlock>
+                <TextBox Name="txtSteamID" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" KeyDown="txtSteamID_KeyDown" TextChanged="txtSteamID_TextChanged" KeyUp="txtSteamID_KeyUp" LayoutUpdated="txtSteamID_LayoutUpdated" >
+                    <Binding RelativeSource="{RelativeSource Self}" Path="Text" UpdateSourceTrigger="Explicit" ValidatesOnDataErrors="True" ValidatesOnExceptions="True" >
+                        <Binding.ValidationRules>
+                            <local:SteamIDValidation/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </Grid>
+            <Button x:Name="btnReport" Content="Report!" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="75" Click="btnReport_Click"/>
+            <Label Content="SteamID belongs to:" HorizontalAlignment="Center" Margin="0,63,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="lblIDName" Content="" HorizontalAlignment="Center" Margin="0,80,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="14" Foreground="#FFCFCFCF"/>
+            <Label x:Name="lblIsReported" Content="" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top"/>
+
+
+
+        </Grid>
+
+    </Grid>
+            <Label Content="Game Item Scammer Alerter" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+            <Border Background="#FF333337" HorizontalAlignment="Right" Margin="0,4,5,0" VerticalAlignment="Top"  Height="20" Width="20" CornerRadius="3">
+                <Label x:Name="lblClose" Content="x"  Height="26" Width="23" Padding="7,-7,0,0" FontSize="20" HorizontalContentAlignment="Center" Margin="-1,-4,0,0" Foreground="#FFCDCBCB" FontFamily="Trebuchet MS" MouseUp="lblClose_MouseUp" />
+            </Border>
+
+
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,64 @@
+﻿<Window x:Class="ScammerAlert.ReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:local="clr-namespace:ScammerAlert.converters"
+        Title="Report a scammer" Height="350" Width="300" ResizeMode="NoResize" Background="{x:Null}" Icon="icon/icon.ico" WindowStyle="None" Loaded="Window_Loaded"  >
+    <Window.Resources>
+        <SolidColorBrush x:Key="brushWatermarkBackground" Color="White" />
+        <SolidColorBrush x:Key="brushWatermarkForeground" Color="LightSteelBlue" />
+        <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />
+        <local:TextInputToVisibilityConverter x:Key="TextInputToVisibilityConverter" />
+
+        <Style x:Key="EntryFieldStyle" TargetType="Grid" >
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="20,0" />
+        </Style>
+    </Window.Resources>
+    <Border Background="#FF3F3F46" >
+        <Grid>
+            <Grid Background="#FF302E2E" Height="320" Width="295" VerticalAlignment="Bottom" Margin="0,0,0,2" >
+
+                <Label Content="Motivation:" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" Foreground="#FFBFBFBF"/>
+                <Label Content="Attachment:" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Foreground="#FFBFBFBF"/>
+                <Button x:Name="btnAddImage" Content="Add Image" HorizontalAlignment="Left" Margin="89,78,0,0" VerticalAlignment="Top" Width="75" Click="btnAddImage_Click"/>
+                <Label Content="SteamID:" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top" Foreground="#FFBFBFBF"/>
+
+                <Grid Margin="0,4,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23"  Width="160" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
+                    <TextBlock Margin="5,2" Text="STEAM_0:X:XXXXXXXX" Foreground="{StaticResource brushWatermarkForeground}" >
+                        <TextBlock.Visibility>
+                            <MultiBinding Converter="{StaticResource TextInputToVisibilityConverter}">
+                                <Binding ElementName="txtSteamID" Path="Text.IsEmpty" />
+                                <Binding ElementName="txtSteamID" Path="IsFocused" />
+                            </MultiBinding>
+                        </TextBlock.Visibility>
+                    </TextBlock>
+                    <TextBox Name="txtSteamID" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" TextChanged="txtSteamID_TextChanged" KeyDown="txtSteamID_KeyDown"  >
+                        <Binding RelativeSource="{RelativeSource Self}" Path="Text" UpdateSourceTrigger="Explicit" ValidatesOnDataErrors="True" ValidatesOnExceptions="True" >
+                            <Binding.ValidationRules>
+                                <local:SteamIDValidation/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox>
+                </Grid>
+                <Button x:Name="btnSend" Content="Send Report" HorizontalAlignment="Center" Margin="0,292,0,0" VerticalAlignment="Top" Width="90" IsEnabled="False"/>
+                <Border BorderThickness="1" BorderBrush="#FFC9C4C4" Margin="0,150,0,0" Height="100" Width="275" HorizontalAlignment="Center" >
+                    <TextBox x:Name="txtMotivation" TextWrapping="Wrap"  Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" TextChanged="TextBox_TextChanged"/>
+                </Border>
+                <ListBox x:Name="lbAttachment" HorizontalAlignment="Left" Height="53" Margin="10,102,0,0" VerticalAlignment="Top" Width="275" Background="{x:Null}" DisplayMemberPath="Name" >
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+                <Label x:Name="lblSteamName" Content="" HorizontalAlignment="Left" Margin="68,32,0,0" VerticalAlignment="Top" Width="160" Foreground="#FFC1C1C1" HorizontalContentAlignment="Center"/>
+            </Grid>
+
+            <Label Content="Report a scammer" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+            <Border Background="#FF333337" HorizontalAlignment="Right" Margin="0,4,5,0" VerticalAlignment="Top"  Height="20" Width="20" CornerRadius="3">
+                <Label x:Name="lblClose" Content="x"  Height="26" Width="23" Padding="7,-7,0,0" FontSize="20" HorizontalContentAlignment="Center" Margin="-1,-4,0,0" Foreground="#FFCDCBCB" FontFamily="Trebuchet MS" MouseUp="lblClose_MouseUp"  />
+            </Border>
+        </Grid>
+    </Border>
+</Window>
