@@ -56,7 +56,7 @@ namespace ScammerAlert
         static string authCode;
         static string reportThisID;
         private MySQL sql;
-        private String connectInfo = "SERVER=89.160.119.29;" + "DATABASE=csgo_scammer;" + "UID=goscammer;" + "PASSWORD=homo123";
+        private String connectInfo = "*the connection-string should be here*";
         public delegate void GuradVisibleCallback(bool value);
         public delegate void UpdateTestCallback(String value);
         private delegate void UpdateScammersList(object list);
