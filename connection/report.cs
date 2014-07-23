@@ -100,7 +100,11 @@ namespace ScammerAlert.connection
 
             set
             {
-                mName = value;
+                if (value != mName)
+                {
+                    mName = value;
+                    OnPropertyChanged("Name");
+                }
             }
         }
 

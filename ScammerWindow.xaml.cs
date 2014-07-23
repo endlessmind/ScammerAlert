@@ -75,6 +75,7 @@ namespace ScammerAlert
                     if (r.SteamID.Equals(callback.FriendID.Render()))
                     {
                         r.AvatarURL = CreateAvatarURL(callback.AvatarHash);
+                        r.Name = callback.Name;
                     }
 
                 }
