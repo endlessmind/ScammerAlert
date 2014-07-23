@@ -35,17 +35,13 @@ namespace ScammerAlert
         System.Windows.Forms.Timer ScammerUpdater;
 
         static SteamClient steamClient;
-        static SteamUser steamUser;
+        static SteamUser steamUser = null;
         static CallbackManager manager;
         static SteamFriends steamFriends;
-
-        static SteamID idTest;
-
 
         static bool isRunning;
         static bool isConnected = false;
         static bool isGuardNeeded;
-        static bool isWarningOpen = false;
         static bool isLoggedOut = false;
 
         ReadOnlyCollection<SteamFriends.FriendsListCallback.Friend> friendList;
@@ -55,8 +51,9 @@ namespace ScammerAlert
         static string user = "", pass = "";
         static string authCode;
         static string reportThisID;
+        static string myNickeName;
         private MySQL sql;
-        private String connectInfo = "*the connection-string should be here*";
+        private String connectInfo = "SERVER=89.160.119.29;" + "DATABASE=csgo_scammer;" + "UID=goscammer;" + "PASSWORD=z87qfbtYzSpMXUBz";
         public delegate void GuradVisibleCallback(bool value);
         public delegate void UpdateTestCallback(String value);
         private delegate void UpdateScammersList(object list);
@@ -155,6 +152,35 @@ namespace ScammerAlert
             
         }
 
+        public String getMySteamID()
+        {
+            if (steamUser.SteamID != null)
+            {
+                return steamUser.SteamID.Render();
+            }
+            else
+            {
+                return "STEAM_0:0:00000000";
+            }
+        }
+
+        public String getMyNickName()
+        {
+            if (steamUser.SteamID != null)
+            {
+                return myNickeName;
+            }
+            else
+            {
+                return "Unknown";
+            }
+        }
+
+        public MySQL getMySQLInstance()
+        {
+            return sql;
+        }
+
         void iconClicked(object sender, EventArgs e)
         {
             
@@ -215,9 +241,10 @@ namespace ScammerAlert
 
                 foreach (Scammer s in scammers)
                 {
+                    s.Reported = sql.getReports(s.ID).Count;
                     foreach (SteamFriends.FriendsListCallback.Friend f in this.friendList)
                     {
-                        if (s.SteamID.Equals(f.SteamID.Render()) && s.Reported > 9)
+                        if (s.SteamID.Equals(f.SteamID.Render()) && s.Reported > 1)
                         {
                           //  Console.WriteLine("Scammer found");
                             foundScammersID.Add(f.SteamID.Render());
@@ -237,7 +264,7 @@ namespace ScammerAlert
 
                 if (foundScammersID.Count < 1)
                 {
-                    System.Windows.Media.Brush b = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF55B44C")); //Green: #FF55B44C
+                    System.Windows.Media.Brush b = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF55B44C")); //Red: #FF781E1E
                     lblStatus.Foreground = b;
                     lblStatus.Content = "Safe";
                     lblShowScammers.Visibility = System.Windows.Visibility.Collapsed;
@@ -535,6 +562,11 @@ namespace ScammerAlert
                 lbScammers.Dispatcher.Invoke(new UpdateScammersList(setScammersList), new object[] { scammersInFriends });
             }
 
+            if (callback.FriendID.Render().Equals(steamUser.SteamID.Render()))
+            {
+                myNickeName = callback.Name;
+            }
+
             if (callback.FriendID.Render().Equals(reportThisID))
             {
               //  Console.WriteLine("ID belongs to: " + callback.Name);
@@ -710,20 +742,12 @@ namespace ScammerAlert
                 }
             }
 
-        public void FetchReports(int scammerID)
-        {
-            if (scamWindow == null || !scamWindow.IsVisible)
-            {
-                scamWindow.setReports(sql.getReports(scammerID));
-            }
-        }
 
         private void btnReport_Click(object sender, RoutedEventArgs e)
         {
             ReportGrid.Visibility = System.Windows.Visibility.Collapsed;
             Scammer s = new Scammer();
             s.SteamID = txtSteamID.Text;
-            s.Reported = 1;
             bool exists = false;
             List<Scammer> scammers = sql.getAllScammers();
             Scammer foundScammer = null;
@@ -742,8 +766,6 @@ namespace ScammerAlert
             }
             else
             {
-                foundScammer.Reported = foundScammer.Reported + 1;
-                sql.updateScammer(foundScammer);
             }
 
             txtSteamID.Text = "";
@@ -842,7 +864,7 @@ namespace ScammerAlert
                 {
                     if (s.SteamID.Equals(scam.SteamID))
                     {
-                        scam.Reported = s.Reported;
+                        
                         scam.ID = s.ID;
                     }
                 }
