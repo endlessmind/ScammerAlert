@@ -9,11 +9,28 @@
         <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />
         <local:TextInputToVisibilityConverter x:Key="TextInputToVisibilityConverter" />
 
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" 
+                         Color="#FF302E2E"/>
+
+        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" 
+                         Color="#FF302E2E" />
+
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+
         <Style x:Key="EntryFieldStyle" TargetType="Grid" >
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="20,0" />
         </Style>
+
+        <DataTemplate x:Key="AttachmentTemplate">
+            <Grid Background="#FF302E2E"  >
+                <Border Margin="5,5,10,5" BorderBrush="Black" BorderThickness="0" >
+                    <TextBlock Text="{Binding Path=Name, FallbackValue=Name}" />
+                </Border>
+            </Grid>
+        </DataTemplate>
+        
     </Window.Resources>
     <Border Background="#FF3F3F46" >
         <Grid>
@@ -41,11 +58,11 @@
                         </Binding>
                     </TextBox>
                 </Grid>
-                <Button x:Name="btnSend" Content="Send Report" HorizontalAlignment="Center" Margin="0,292,0,0" VerticalAlignment="Top" Width="90" IsEnabled="False"/>
+                <Button x:Name="btnSend" Content="Send Report" HorizontalAlignment="Center" Margin="0,292,0,0" VerticalAlignment="Top" Width="90" IsEnabled="False" Click="btnSend_Click"/>
                 <Border BorderThickness="1" BorderBrush="#FFC9C4C4" Margin="0,150,0,0" Height="100" Width="275" HorizontalAlignment="Center" >
                     <TextBox x:Name="txtMotivation" TextWrapping="Wrap"  Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" TextChanged="TextBox_TextChanged"/>
                 </Border>
-                <ListBox x:Name="lbAttachment" HorizontalAlignment="Left" Height="53" Margin="10,102,0,0" VerticalAlignment="Top" Width="275" Background="{x:Null}" DisplayMemberPath="Name" >
+                <ListBox x:Name="lbAttachment" HorizontalAlignment="Left" Height="53" Margin="10,102,0,0" VerticalAlignment="Top" Width="275" Background="{x:Null}" ItemTemplate="{StaticResource AttachmentTemplate}" MouseDoubleClick="lbAttachment_MouseDoubleClick" >
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal" ScrollViewer.HorizontalScrollBarVisibility="Auto" />

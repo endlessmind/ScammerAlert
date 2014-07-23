@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
 namespace ScammerAlert.connection
 {
-    class report
+    public class report : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            var handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         private int mID;
         private String mSteamID;
         private String mName;
+        private String mAvatarURL;
         private int mScammerID;
         private String mComment;
         private DateTime mTime;
@@ -90,6 +101,24 @@ namespace ScammerAlert.connection
             set
             {
                 mName = value;
+            }
+        }
+
+        public String AvatarURL
+        {
+            get
+            {
+                return mAvatarURL;
+            }
+
+            set
+            {
+                if (value != mAvatarURL)
+                {
+                    mAvatarURL = value;
+                    OnPropertyChanged("AvatarURL");
+                }
+
             }
         }
 
