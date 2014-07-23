@@ -96,8 +96,6 @@
     </ApplicationDefinition>
     <Compile Include="connection\attachment.cs" />
     <Compile Include="connection\file.cs" />
-    <Compile Include="connection\ReportCollection.cs" />
-    <Compile Include="converters\FilenameToURLConverter.cs" />
     <Compile Include="converters\NumbToStringConverter.cs" />
     <Compile Include="ReportWindow.xaml.cs">
       <DependentUpon>ReportWindow.xaml</DependentUpon>

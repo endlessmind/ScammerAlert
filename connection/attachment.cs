@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ScammerAlert.connection
 {
-    public class attachment
+    class attachment
     {
         private int mID;
         private String mFilename;

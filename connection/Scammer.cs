@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ScammerAlert.connection
 {
-    public class Scammer
+    class Scammer
     {
 
         private int mID;

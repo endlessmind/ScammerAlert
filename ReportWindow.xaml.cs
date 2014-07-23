@@ -14,8 +14,6 @@ using System.Windows.Shapes;
 using System.IO;
 using ScammerAlert.connection;
 using SteamKit2;
-using System.Threading;
-using System.Net;
 
 namespace ScammerAlert
 {
@@ -26,15 +24,11 @@ namespace ScammerAlert
     {
         private List<file> files = new List<file>();
         MainWindow main;
-        static string reportThisID, motivation;
+        static string reportThisID;
         static SteamFriends steamFriends;
-        Thread SenderThread;
-        private MySQL sql;
 
 
         public delegate void UpdateTestCallback(String value);
-        
-        private delegate void CloseWindow();
 
         public ReportWindow()
         {
@@ -49,7 +43,6 @@ namespace ScammerAlert
         public void setMainWindow(MainWindow window)
         {
             main = window;
-            sql = main.getMySQLInstance();
         }
 
 
@@ -58,21 +51,11 @@ namespace ScammerAlert
             steamFriends = f;
         }
 
-        private void CloseThis()
-        {
-            this.Close();
-        }
-
         private void SteamNameText(String value)
         {
             lblSteamName.Dispatcher.Invoke(
                 new UpdateTestCallback(setSteamName),
                 new object[] { value });
-        }
-
-        private void CloseThisWindow()
-        {
-            this.Dispatcher.Invoke(new CloseWindow(CloseThis), null);
         }
 
         private void setSteamName(String value)
@@ -95,70 +78,6 @@ namespace ScammerAlert
             this.Top = desktopWorkingArea.Bottom - this.Height;
 
             
-        }
-
-        private void runSender()
-        {
-            //Check if the SteamID is already reported
-            Scammer s = new Scammer();
-            s.SteamID = reportThisID;
-            s.Reported = 1;
-            bool exists = false;
-            int scammerID;
-            List<Scammer> scammers = sql.getAllScammers();
-            Scammer foundScammer = null;
-            foreach (Scammer scam in scammers)
-            {
-                if (scam.SteamID.Equals(s.SteamID))
-                {
-                    foundScammer = scam;
-                    exists = true;
-                }
-            }
-
-            //If i don't exists, we'll add it. But if i dose, then we just need the ID
-            if (!exists)
-            {
-                sql.addScammer(s);
-                scammerID = sql.getScammer(s.SteamID).ID;
-            }
-            else
-            {
-                scammerID = foundScammer.ID;
-            }
-
-
-            //Now we need to create the report
-            report r = new report();
-            r.Comment = motivation;
-            r.Name = main.getMyNickName();
-            r.ScammerID = scammerID;
-            r.SteamID = main.getMySteamID();
-            r.Time = DateTime.Now;
-
-            sql.addReport(r);
-
-            //Now we need the report's id. It's needed for us to be able to link the attachments to the correct report
-            int reportID = sql.getReports(r.ScammerID, r.SteamID)[0].ID;
-
-            string AttachmentFolder = AppDomain.CurrentDomain.BaseDirectory + "\\attachment\\";
-            foreach (file f in files)
-            {
-                WebClient client = new WebClient();
-                client.Credentials = CredentialCache.DefaultCredentials;
-                client.UploadFile(@"http://" + "89.160.119.29" + "/scammers/upload_attachment.php", "POST", AttachmentFolder + f.Hash);
-                attachment a = new attachment();
-                a.Filename = f.Hash;
-                a.ReportID = reportID;
-                sql.addAttachment(a);
-            }
-            CloseThisWindow();
-
-            foreach (file f in files)
-            {
-                File.Delete(AttachmentFolder + f.Hash);
-            }
-
         }
 
         private bool IsValid(string value)
@@ -204,27 +123,9 @@ namespace ScammerAlert
 
         private void btnAddImage_Click(object sender, RoutedEventArgs e)
         {
-            string AttachmentFolder = AppDomain.CurrentDomain.BaseDirectory + "\\attachment\\";
-            if (!Directory.Exists(AttachmentFolder))
-            {
-                DirectoryInfo d = Directory.CreateDirectory(AttachmentFolder);
-            }
-
-
-
-
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            System.Drawing.Imaging.ImageCodecInfo[] codecs = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-            String sep = String.Empty;
-            dlg.Filter = "";
-            foreach (System.Drawing.Imaging.ImageCodecInfo c in codecs)
-            {
-                string CodecName = c.CodecName.Substring(8).Replace("Codec", "Files").Trim();
-                dlg.Filter = String.Format("{0}{1}{2} ({3})|{3}", dlg.Filter, sep, CodecName, c.FilenameExtension);
-                sep = "|";
-            }
-            dlg.FilterIndex = 2;
-            
+            dlg.DefaultExt = ".jpg";
+            dlg.Filter = "JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true)
@@ -238,15 +139,15 @@ namespace ScammerAlert
                 String uid = System.Guid.NewGuid().ToString();
                 file f = new file();
                 String FilePath = dlg.FileName;
+                String extention = FilePath.Substring(FilePath.Length - 3, 3);
                 String FileName = FilePath.Substring(FilePath.LastIndexOf("\\") + 1);
-                String extention = FileName.Split('.')[FileName.Split('.').Length - 1];
                 FileName = FileName.Substring(0, FileName.Length - 4);
 
                 f.Name = FileName;
                 f.Path = FilePath;
                 f.Hash = uid + "." + extention;
                 f.Extension = extention;
-                info.CopyTo(AttachmentFolder + f.Hash);
+
                 files.Add(f);
 
                 lbAttachment.Items.Add(f);
@@ -299,31 +200,6 @@ namespace ScammerAlert
 
                 }
             }
-
-        }
-
-        private void lbAttachment_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (lbAttachment.SelectedIndex > -1)
-            {
-                file f = (file)lbAttachment.SelectedItem;
-                if (MessageBox.Show("Do you want to remove " + f.Name + "." + f.Extension + " from the list?", "Remove?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    string AttachmentFolder = AppDomain.CurrentDomain.BaseDirectory + "\\attachment\\";
-                    files.Remove(f);
-                    lbAttachment.Items.Remove(f);
-                    File.Delete(AttachmentFolder + f.Hash);
-                }
-            }
-        }
-
-        private void btnSend_Click(object sender, RoutedEventArgs e)
-        {
-            motivation = txtMotivation.Text;
-            reportThisID = txtSteamID.Text;
-            SenderThread = new Thread(new ThreadStart(runSender));
-            SenderThread.Start();
-            btnSend.IsEnabled = false;
 
         }
     }
