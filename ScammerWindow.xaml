@@ -68,7 +68,7 @@
 
                 <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" Margin="5" Grid.Row="0"/>
 
-                    <ListBox x:Name="lbAttach" MinHeight="50" Grid.Row="1"  VerticalAlignment="Bottom" ItemsSource="{Binding Attachment}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="{x:Null}" ScrollViewer.CanContentScroll="True" BorderBrush="{x:Null}" >
+                    <ListBox x:Name="lbAttach" MinHeight="50" Grid.Row="1"  VerticalAlignment="Bottom" ItemsSource="{Binding Attachment}" Background="{x:Null}" ScrollViewer.CanContentScroll="True" BorderBrush="{x:Null}" >
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal" />

@@ -138,25 +138,31 @@ namespace ScammerAlert
 
             sql.addReport(r);
 
-            //Now we need the report's id. It's needed for us to be able to link the attachments to the correct report
-            int reportID = sql.getReports(r.ScammerID, r.SteamID)[0].ID;
 
-            string AttachmentFolder = AppDomain.CurrentDomain.BaseDirectory + "\\attachment\\";
-            foreach (file f in files)
+            if (files.Count > 0)
             {
-                WebClient client = new WebClient();
-                client.Credentials = CredentialCache.DefaultCredentials;
-                client.UploadFile(@"http://" + "89.160.119.29" + "/scammers/upload_attachment.php", "POST", AttachmentFolder + f.Hash);
-                attachment a = new attachment();
-                a.Filename = f.Hash;
-                a.ReportID = reportID;
-                sql.addAttachment(a);
-            }
-            CloseThisWindow();
 
-            foreach (file f in files)
-            {
-                File.Delete(AttachmentFolder + f.Hash);
+                //Now we need the report's id. It's needed for us to be able to link the attachments to the correct report
+                int reportID = sql.getReports(r.ScammerID, r.SteamID)[0].ID;
+
+                string AttachmentFolder = AppDomain.CurrentDomain.BaseDirectory + "\\attachment\\";
+                foreach (file f in files)
+                {
+                    WebClient client = new WebClient();
+                    client.Credentials = CredentialCache.DefaultCredentials;
+                    client.UploadFile(@"http://" + "89.160.119.29" + "/scammers/upload_attachment.php", "POST", AttachmentFolder + f.Hash);
+                    attachment a = new attachment();
+                    a.Filename = f.Hash;
+                    a.ReportID = reportID;
+                    sql.addAttachment(a);
+                }
+                CloseThisWindow();
+
+                foreach (file f in files)
+                {
+                    File.Delete(AttachmentFolder + f.Hash);
+                }
+
             }
 
         }
