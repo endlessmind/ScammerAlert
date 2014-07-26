@@ -33,14 +33,15 @@ namespace ScammerAlert.converters
                                 int longID = int.Parse(((String)value).Split(':')[2], NumberStyles.Any);
                                 return new ValidationResult(true, null);
                             }
-                            catch (Exception e) { Console.WriteLine(e.Message); Console.WriteLine(e.StackTrace); return new ValidationResult(false, "Inport not in correct format"); }
+                            catch (Exception e) { Console.WriteLine(e.Message); Console.WriteLine(e.StackTrace); return new ValidationResult(false, "Input not in correct format"); }
 
 
 
-                        } else { return new ValidationResult(false, "Inport not in correct format"); }
+                        } else { return new ValidationResult(false, "Input not in correct format"); }
 
 
-                    } else { return new ValidationResult(false, "Inport not in correct format"); }
+                    }
+                    else { return new ValidationResult(false, "Input not in correct format"); }
                 } else { return new ValidationResult(true, null); }
             }
             catch (Exception e1)
