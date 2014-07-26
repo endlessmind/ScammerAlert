@@ -71,6 +71,7 @@ namespace ScammerAlert
         {
             InitializeComponent();
             m_contextMenu = new System.Windows.Forms.ContextMenuStrip();
+            
 
         }
 
@@ -914,6 +915,11 @@ namespace ScammerAlert
 
 
             steamUser.LogOff();
+        }
+
+        private void Binding_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
+
         }
 
     }

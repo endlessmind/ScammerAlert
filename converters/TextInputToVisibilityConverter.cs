@@ -13,14 +13,22 @@ namespace ScammerAlert.converters
         {
             // Always test MultiValueConverter inputs for non-null
             // (to avoid crash bugs for views in the designer)
+            
+            bool hasText = false;
             if (values[0] is bool && values[1] is bool)
             {
-                bool hasText = !(bool)values[0];
+                hasText = !(bool)values[0];
                 bool hasFocus = (bool)values[1];
 
-                if (hasText)
-                    return Visibility.Collapsed;
+
             }
+            else if (values[0] is Int32)
+            {
+                hasText = (bool)values[1];
+            }
+
+            if (hasText)
+                return Visibility.Collapsed;
 
             return Visibility.Visible;
         }

@@ -61,7 +61,7 @@
                 <TextBlock Margin="5,2" Text="Password" Foreground="{StaticResource brushWatermarkForeground}" >
                     <TextBlock.Visibility>
                         <MultiBinding Converter="{StaticResource TextInputToVisibilityConverter}">
-                            <Binding ElementName="txtPassword" Path="Password.IsEmpty" />
+                                    <Binding ElementName="txtPassword" Path="Password.Length" />
                             <Binding ElementName="txtPassword" Path="IsFocused" />
                         </MultiBinding>
                     </TextBlock.Visibility>
