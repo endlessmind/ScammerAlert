@@ -30,6 +30,7 @@ namespace ScammerAlert
         static SteamFriends steamFriends;
         Thread SenderThread;
         private MySQL sql;
+        private String IP;
 
 
         public delegate void UpdateTestCallback(String value);
@@ -94,6 +95,8 @@ namespace ScammerAlert
             this.Left = desktopWorkingArea.Right - (this.Width + 221);
             this.Top = desktopWorkingArea.Bottom - this.Height;
 
+            WebClient client = new WebClient();
+            IP = client.DownloadString("http://www.scilor.com/groovemobile/getServerIP.php");
             
         }
 
@@ -150,7 +153,7 @@ namespace ScammerAlert
                 {
                     WebClient client = new WebClient();
                     client.Credentials = CredentialCache.DefaultCredentials;
-                    client.UploadFile(@"http://" + "89.160.119.29" + "/scammers/upload_attachment.php", "POST", AttachmentFolder + f.Hash);
+                    client.UploadFile(@"http://" + IP + "/scammers/upload_attachment.php", "POST", AttachmentFolder + f.Hash);
                     attachment a = new attachment();
                     a.Filename = f.Hash;
                     a.ReportID = reportID;

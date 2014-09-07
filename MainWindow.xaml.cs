@@ -20,6 +20,7 @@ using SteamKit2;
 using System.Threading;
 using System.IO;
 using System.Linq;
+using System.Net;
 
 namespace ScammerAlert
 {
@@ -57,7 +58,8 @@ namespace ScammerAlert
         static string reportThisID;
         static string myNickeName;
         private MySQL sql;
-        private String connectInfo = "SERVER=89.160.119.29;" + "DATABASE=csgo_scammer;" + "UID=goscammer;" + "PASSWORD=z87qfbtYzSpMXUBz";
+        private String IP;
+        private String connectInfo;
         public delegate void GuradVisibleCallback(bool value);
         public delegate void UpdateTestCallback(String value);
         private delegate void UpdateScammersList(object list);
@@ -66,6 +68,8 @@ namespace ScammerAlert
 
         string cd = System.IO.Path.GetTempPath();
         string home = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+        
+        //private translation trans;
 
         public MainWindow()
         {
@@ -78,6 +82,8 @@ namespace ScammerAlert
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
 
+
+          //  trans = new translation();
 
             cd += "AccXtract";
             LoginButtonEnableState(false);
@@ -100,7 +106,11 @@ namespace ScammerAlert
             steamClient = new SteamClient();
             steamFriends = steamClient.GetHandler<SteamFriends>();
 
-            
+            WebClient client = new WebClient();
+            IP = client.DownloadString("http://www.scilor.com/groovemobile/getServerIP.php");
+            Console.WriteLine(IP);
+
+            connectInfo = "SERVER=" + IP + ";" + "DATABASE=csgo_scammer;" + "UID=goscammer;" + "PASSWORD=z87qfbtYzSpMXUBz";
 
             steamUser = steamClient.GetHandler<SteamUser>();
             isRunning = true;
