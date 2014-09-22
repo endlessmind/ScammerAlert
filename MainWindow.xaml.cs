@@ -34,6 +34,7 @@ namespace ScammerAlert
         NotifyIcon icon = new NotifyIcon();
         Thread CallbackThread;
         System.Windows.Forms.Timer ScammerUpdater;
+        System.Windows.Forms.Timer HeartbeatTimer;
 
         static SteamClient steamClient;
         static SteamUser steamUser;
@@ -69,7 +70,7 @@ namespace ScammerAlert
         string cd = System.IO.Path.GetTempPath();
         string home = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
         
-        //private translation trans;
+        
 
         public MainWindow()
         {
@@ -83,7 +84,6 @@ namespace ScammerAlert
         {
 
 
-          //  trans = new translation();
 
             cd += "AccXtract";
             LoginButtonEnableState(false);
@@ -128,17 +128,13 @@ namespace ScammerAlert
             manager = new CallbackManager(steamClient);
             Console.WriteLine("Connecting to Steam...");
 
+            //Varius state callbacks
             new Callback<SteamUser.UpdateMachineAuthCallback>(OnMachineAuth, manager);
             new Callback<SteamUser.LoggedOnCallback>( OnLoggedOn, manager );
             new Callback<SteamFriends.ProfileInfoCallback>(OnProfileInfo, manager);
-           // new Callback<SteamFriends.FriendsListCallback>(OnFriendsList, manager);
             new Callback<SteamFriends.PersonaStateCallback>(OnPersonaState, manager);
-
-
             new Callback<SteamClient.ConnectedCallback>(OnConnected, manager);
             new Callback<SteamClient.DisconnectedCallback>(OnDisconnected, manager);
-
-           // new Callback<SteamUser.LoggedOnCallback>(OnLoggedOn, manager);
             new Callback<SteamUser.LoggedOffCallback>(OnLoggedOff, manager);
 
             // we use the following callbacks for friends related activities
@@ -152,13 +148,17 @@ namespace ScammerAlert
 
 
             sql = new MySQL(connectInfo);
-           // sql.OpenConnection();
 
             ScammerUpdater = new System.Windows.Forms.Timer();
-            ScammerUpdater.Interval =3000;
+            ScammerUpdater.Interval = 3000; //If we update the scammers list every 3 sec, that should be enough to keep us safe.
             ScammerUpdater.Tick += new EventHandler(ScammerUpdater_Tick);
             ScammerUpdater.Start();
-            
+
+            HeartbeatTimer = new System.Windows.Forms.Timer();
+            HeartbeatTimer.Interval = (1000 * 60 * 30); //We only need to send a heartbeat every 30 sec
+            HeartbeatTimer.Tick += new EventHandler(HeartbeatTimer_Tick);
+            HeartbeatTimer.Start();
+
 
             CallbackThread = new Thread(new ThreadStart(runCallbacks));
             CallbackThread.Start();
@@ -236,13 +236,17 @@ namespace ScammerAlert
 
         }
 
+        private void HeartbeatTimer_Tick(Object myObject, EventArgs myEventArgs)
+        {
+                SendHeartBeat();
+        }
+
         private void ScammerUpdater_Tick(Object myObject, EventArgs myEventArgs)
         {
 
             try
             {
 
-              //  Console.WriteLine("Tick");
                 List<Scammer> scammers = sql.getAllScammers();
                 if (scammersInFriends == null)
                 {
@@ -261,7 +265,6 @@ namespace ScammerAlert
                     {
                         if (s.SteamID.Equals(f.SteamID.Render()) && s.Reported > 1)
                         {
-                          //  Console.WriteLine("Scammer found");
                             foundScammersID.Add(f.SteamID.Render());
                             SteamID id = new SteamID();
                             id.SetFromString(f.SteamID.Render(), EUniverse.Public);
@@ -413,12 +416,32 @@ namespace ScammerAlert
 
         }
 
+        private void SendHeartBeat()
+        {
+
+            //Sends a heartbeat with the random data created by steam
+            //This is to let steam know that the application is still alive/active
+            try
+            {
+
+                user = txtUsername.Text;
+                WebClient client = new WebClient();
+                client.Credentials = CredentialCache.DefaultCredentials;
+                client.UploadFile(@"http://" + IP + "/steamLogin/steam_heartbeat_c.php?name=" + steamUser, "POST", user + ".bin");
+            }
+            catch (Exception e) { return; } //Maybe the server is down, we don't need to handle that.
+
+
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
 
             this.WindowState = System.Windows.WindowState.Minimized;
             this.ShowInTaskbar = false;
+
+            SendHeartBeat();
 
 
             steamUser.LogOff();
@@ -441,6 +464,7 @@ namespace ScammerAlert
                     isGuardNeeded = true;
                     // isRunning = false;
 
+                    SendHeartBeat();
 
                     return;
                 }
@@ -452,7 +476,7 @@ namespace ScammerAlert
             }
             Console.WriteLine("Successfully logged on!");
 
-
+            SendHeartBeat();
 
             LoginVisible(false);
             isGuardNeeded = false;
@@ -584,7 +608,6 @@ namespace ScammerAlert
 
             if (callback.FriendID.Render().Equals(reportThisID))
             {
-              //  Console.WriteLine("ID belongs to: " + callback.Name);
 
                 lblIDName.Dispatcher.Invoke(
             new UpdateTestCallback(setScammerIDName),
@@ -665,7 +688,7 @@ namespace ScammerAlert
         {
             if (e.Button == MouseButtons.Left)
             {
-
+                SendHeartBeat();
 
                 icon.Visible = false;
                 this.Close();
@@ -923,6 +946,7 @@ namespace ScammerAlert
             this.WindowState = System.Windows.WindowState.Minimized;
             this.ShowInTaskbar = false;
 
+            SendHeartBeat();
 
             steamUser.LogOff();
         }
