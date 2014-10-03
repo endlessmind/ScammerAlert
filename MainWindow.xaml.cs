@@ -21,6 +21,8 @@ using System.Threading;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace ScammerAlert
 {
@@ -69,14 +71,14 @@ namespace ScammerAlert
 
         string cd = System.IO.Path.GetTempPath();
         string home = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-        
-        
+
+
 
         public MainWindow()
         {
             InitializeComponent();
             m_contextMenu = new System.Windows.Forms.ContextMenuStrip();
-            
+
 
         }
 
@@ -101,8 +103,15 @@ namespace ScammerAlert
 
             mI1.MouseUp += new System.Windows.Forms.MouseEventHandler(CloseMenuItem_Click);
 
+            System.Windows.Forms.ToolStripMenuItem mI2= new System.Windows.Forms.ToolStripMenuItem();
+            mI2.Text = "Check for updates";
+
+            mI2.MouseUp += new System.Windows.Forms.MouseEventHandler(UpdateMenuItem_Click);
+
+
             m_contextMenu.Items.Add(mI1);
-            
+            m_contextMenu.Items.Add(mI2);
+
             steamClient = new SteamClient();
             steamFriends = steamClient.GetHandler<SteamFriends>();
 
@@ -115,7 +124,7 @@ namespace ScammerAlert
             steamUser = steamClient.GetHandler<SteamUser>();
             isRunning = true;
 
-            
+
 
             icon.Icon = new Icon(@"icon.ico");
             icon.Visible = true;
@@ -123,14 +132,14 @@ namespace ScammerAlert
             icon.Click += new EventHandler(iconClicked);
             icon.ContextMenuStrip = m_contextMenu;
 
-            
+
 
             manager = new CallbackManager(steamClient);
             Console.WriteLine("Connecting to Steam...");
 
             //Varius state callbacks
             new Callback<SteamUser.UpdateMachineAuthCallback>(OnMachineAuth, manager);
-            new Callback<SteamUser.LoggedOnCallback>( OnLoggedOn, manager );
+            new Callback<SteamUser.LoggedOnCallback>(OnLoggedOn, manager);
             new Callback<SteamFriends.ProfileInfoCallback>(OnProfileInfo, manager);
             new Callback<SteamFriends.PersonaStateCallback>(OnPersonaState, manager);
             new Callback<SteamClient.ConnectedCallback>(OnConnected, manager);
@@ -163,8 +172,8 @@ namespace ScammerAlert
             CallbackThread = new Thread(new ThreadStart(runCallbacks));
             CallbackThread.Start();
 
-            
-            
+
+
         }
 
         public String getMySteamID()
@@ -198,7 +207,7 @@ namespace ScammerAlert
 
         void iconClicked(object sender, EventArgs e)
         {
-            
+
             this.WindowState = System.Windows.WindowState.Normal;
             this.ShowInTaskbar = true;
 
@@ -238,7 +247,7 @@ namespace ScammerAlert
 
         private void HeartbeatTimer_Tick(Object myObject, EventArgs myEventArgs)
         {
-                SendHeartBeat();
+            SendHeartBeat();
         }
 
         private void ScammerUpdater_Tick(Object myObject, EventArgs myEventArgs)
@@ -290,7 +299,7 @@ namespace ScammerAlert
                 }
 
 
-               
+
 
             }
             catch (Exception e) { /*Console.WriteLine(e.Message); Console.WriteLine(e.StackTrace);*/ }
@@ -325,7 +334,8 @@ namespace ScammerAlert
             btnLogin.IsEnabled = value;
         }
 
-        private void setScammerIDName(String value) {
+        private void setScammerIDName(String value)
+        {
             lblIDName.Content = value;
         }
 
@@ -373,7 +383,7 @@ namespace ScammerAlert
             user = txtUsername.Text;
             pass = txtPassword.Password;
 
-          
+
 
             if (isConnected)
             {
@@ -406,13 +416,13 @@ namespace ScammerAlert
                 }
 
 
-            
+
             }
             else
             {
                 Console.WriteLine("Not connected");
             }
-    
+
 
         }
 
@@ -446,7 +456,7 @@ namespace ScammerAlert
 
             steamUser.LogOff();
         }
-#region callbacks
+        #region callbacks
 
         private void OnLoggedOn(SteamUser.LoggedOnCallback callback)
         {
@@ -499,7 +509,7 @@ namespace ScammerAlert
             Console.WriteLine("Updating sentryfile...");
 
             byte[] sentryHash = CryptoHelper.SHAHash(callback.Data);
-            
+
 
             // write out our sentry file
             // ideally we'd want to write to the filename specified in the callback
@@ -546,7 +556,7 @@ namespace ScammerAlert
 
             String baseURL = "http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/";
 
-            String extendedUrL = hash.Substring(0,2) + "/" + hash + "_full.jpg";
+            String extendedUrL = hash.Substring(0, 2) + "/" + hash + "_full.jpg";
             if (hash.Substring(0, 6) == "000000")
             {
                 return "http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg";
@@ -563,7 +573,7 @@ namespace ScammerAlert
                 //If we get a callback for that scammer
                 if (s == callback.FriendID.Render())
                 {
-                    
+
                     //Check if we already added it to the list
                     bool exists = false;
                     foreach (Scammer sc in scammersInFriends)
@@ -615,7 +625,7 @@ namespace ScammerAlert
             }
         }
 
-        
+
 
         static void OnFriendAdded(SteamFriends.FriendAddedCallback callback)
         {
@@ -662,11 +672,11 @@ namespace ScammerAlert
             isRunning = false;
             LoginButtonEnableState(false);
             LoginButtonText("Connecting..");
-                reconnect();
-            
+            reconnect();
+
         }
 
-#endregion
+        #endregion
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -674,12 +684,12 @@ namespace ScammerAlert
             {
                 reportWindow = new ReportWindow();
                 reportWindow.Show();
-                
+
 
             }
             reportWindow.setMainWindow(this);
             reportWindow.setSteamFriend(steamFriends);
-          //  ReportGrid.Visibility = System.Windows.Visibility.Visible;
+            //  ReportGrid.Visibility = System.Windows.Visibility.Visible;
             ScammersListGrid.Visibility = System.Windows.Visibility.Collapsed;
             //txtSteamID.Focus();
         }
@@ -694,6 +704,24 @@ namespace ScammerAlert
                 this.Close();
                 System.Windows.Application.Current.Shutdown();
                 System.Environment.Exit(0);
+            }
+
+        }
+
+        private void UpdateMenuItem_Click(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                String path = AppDomain.CurrentDomain.BaseDirectory + "Updater.exe";
+                Console.WriteLine(path);
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+                String version = fvi.FileVersion;
+
+                ProcessStartInfo p = new ProcessStartInfo();
+                p.FileName = path;
+                p.Arguments = "-app ScammerAlert -version " + version.Replace(".", "") + " -procName ScammerAlert"; 
+                Process.Start(p);
             }
 
         }
@@ -719,66 +747,66 @@ namespace ScammerAlert
             btnReport.IsEnabled = IsValid(txtSteamID.Text);
 
 
-                if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter)
+            {
+
+                if (IsValid(txtSteamID.Text))
                 {
+                    SteamID id = new SteamID();
+                    id.SetFromString(txtSteamID.Text, EUniverse.Public);
+                    steamFriends.RequestFriendInfo(id);
+                    //steamFriends.RequestProfileInfo(id);
+                    reportThisID = txtSteamID.Text;
 
-                        if (IsValid(txtSteamID.Text))
-                        {
-                            SteamID id = new SteamID();
-                            id.SetFromString(txtSteamID.Text, EUniverse.Public);
-                            steamFriends.RequestFriendInfo(id);
-                            //steamFriends.RequestProfileInfo(id);
-                            reportThisID = txtSteamID.Text;
-
-                            if (IsSteamIDReported(reportThisID))
-                            {
-                                lblIsReported.Content = "This user is reported";
-                            }
-                        }
+                    if (IsSteamIDReported(reportThisID))
+                    {
+                        lblIsReported.Content = "This user is reported";
+                    }
                 }
-            
+            }
+
         }
 
         private bool IsValid(string value)
+        {
+            try
             {
-                try
+                if (((String)value).Length == 18)
                 {
-                    if (((String)value).Length == 18)
+                    if (((String)value).Substring(0, 6).ToUpper().Equals("STEAM_"))
                     {
-                        if (((String)value).Substring(0, 6).ToUpper().Equals("STEAM_"))
+
+                        if (((String)value).Split(':').Length == 3)
                         {
 
-                            if (((String)value).Split(':').Length == 3)
+                            try
                             {
+                                int firstNumber = int.Parse(((String)value).Split(':')[0].Substring(6), NumberStyles.Any);
 
-                                try
-                                {
-                                    int firstNumber = int.Parse(((String)value).Split(':')[0].Substring(6), NumberStyles.Any);
+                                int numberTwo = int.Parse(((String)value).Split(':')[1], NumberStyles.Any);
 
-                                    int numberTwo = int.Parse(((String)value).Split(':')[1], NumberStyles.Any);
-
-                                    int longID = int.Parse(((String)value).Split(':')[2], NumberStyles.Any);
-                                    return true;
-                                }
-                                catch (Exception e) { Console.WriteLine(e.Message); Console.WriteLine(e.StackTrace); return false; }
-
-
-
+                                int longID = int.Parse(((String)value).Split(':')[2], NumberStyles.Any);
+                                return true;
                             }
-                            else { return false; }
+                            catch (Exception e) { Console.WriteLine(e.Message); Console.WriteLine(e.StackTrace); return false; }
+
 
 
                         }
                         else { return false; }
+
+
                     }
                     else { return false; }
                 }
-                catch (Exception e1)
-                {
-                    Console.WriteLine(e1.StackTrace);
-                    return false;
-                }
+                else { return false; }
             }
+            catch (Exception e1)
+            {
+                Console.WriteLine(e1.StackTrace);
+                return false;
+            }
+        }
 
 
         private void btnReport_Click(object sender, RoutedEventArgs e)
@@ -854,7 +882,7 @@ namespace ScammerAlert
 
                 if (IsSteamIDReported(reportThisID))
                 {
-                    lblIsReported.Content= "This user is reported";
+                    lblIsReported.Content = "This user is reported";
                 }
             }
         }
@@ -894,9 +922,10 @@ namespace ScammerAlert
 
         private void Label_MouseUp(object sender, MouseButtonEventArgs e)
         {
-          //  ScammersListGrid.Visibility = System.Windows.Visibility.Visible;
+            //  ScammersListGrid.Visibility = System.Windows.Visibility.Visible;
             List<Scammer> scammers = sql.getAllScammers();
-            foreach (Scammer s in scammers) {
+            foreach (Scammer s in scammers)
+            {
 
                 foreach (Scammer scam in scammersInFriends)
                 {
@@ -910,7 +939,7 @@ namespace ScammerAlert
             if (scamWindow == null || !scamWindow.IsVisible)
             {
                 scamWindow = new ScammerWindow();
-                
+
                 scamWindow.Show();
                 scamWindow.setMainWindow(this);
                 scamWindow.ScammersInYourList(scammersInFriends);
@@ -920,7 +949,7 @@ namespace ScammerAlert
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            
+
             var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
             this.Left = desktopWorkingArea.Right - this.Width;
             this.Top = desktopWorkingArea.Bottom - this.Height;
@@ -934,11 +963,11 @@ namespace ScammerAlert
                 reportWindow.Show();
 
             }
-                        reportWindow.setMainWindow(this);
+            reportWindow.setMainWindow(this);
             reportWindow.setSteamFriend(steamFriends);
-          //  ReportGrid.Visibility = System.Windows.Visibility.Visible;
+            //  ReportGrid.Visibility = System.Windows.Visibility.Visible;
             ScammersListGrid.Visibility = System.Windows.Visibility.Collapsed;
-           // txtSteamID.Focus();
+            // txtSteamID.Focus();
         }
 
         private void lblClose_MouseUp(object sender, MouseButtonEventArgs e)
