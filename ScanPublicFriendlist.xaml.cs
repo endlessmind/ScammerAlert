@@ -228,6 +228,44 @@ namespace ScammerAlert
             return false;
         }
 
+        public string getName(String id)
+        {
+            if (!Utils.is64bitID(id))
+            {
+                id = Utils.GetCommunityID(id);
+            }
+
+            using (WebAPI.Interface steamFriedList = WebAPI.GetInterface("ISteamUser", "9DF293619722CA60815A3354C19DAB4F"))
+            {
+                try
+                {
+                    Dictionary<string, string> MyArgs = new Dictionary<string, string>();
+                    MyArgs["steamids"] = "[" + id + "]";
+                    KeyValue MyResult = steamFriedList.Call("GetPlayerSummaries", 2, MyArgs);
+
+                    return MyResult.Children[0].Children[0]["personaname"].Value;
+                }
+                catch (Exception e) { return null; }
+            }
+        }
+
+        private void ValidateInput(string id)
+        {
+            Thread t1 = new Thread(new ThreadStart(delegate
+            {
+                string result = getName(id);
+                if (result != null)
+                {
+                    UpdateLableText(lblSteamName, result);
+                    ChangeEnable(btnCheck, true);
+                }
+                else { ChangeEnable(btnCheck, false); UpdateLableText(lblSteamName, "INVALID"); }
+
+
+            }));
+            t1.Start();
+        }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -269,16 +307,16 @@ namespace ScammerAlert
 
         private void txtSteamID_TextChanged(object sender, TextChangedEventArgs e)
         {
+            txtSteamID.GetBindingExpression(TextBox.TextProperty).UpdateSource();
             if (IsValid(txtSteamID.Text))
             {
-
+                ValidateInput(txtSteamID.Text);
             }
         }
 
         private void txtSteamID_KeyDown(object sender, KeyEventArgs e)
         {
-            BindingExpression expression = txtSteamID.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
-            expression.UpdateSource();
+            txtSteamID.GetBindingExpression(TextBox.TextProperty).UpdateSource();
 
             if (IsValid(txtSteamID.Text))
             {

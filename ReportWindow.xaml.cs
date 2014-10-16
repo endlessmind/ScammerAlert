@@ -25,6 +25,8 @@ namespace ScammerAlert
     /// </summary>
     public partial class ReportWindow : Window
     {
+        public delegate void UpdateTextCallback(String value);
+        public delegate void OverallCallback();
         private List<file> files = new List<file>();
         MainWindow main;
         static string reportThisID, motivation;
@@ -40,6 +42,21 @@ namespace ScammerAlert
         public ReportWindow()
         {
             InitializeComponent();
+        }
+
+        private void UpdateLableText(Label lbl, String value)
+        {
+
+
+            lbl.Dispatcher.Invoke(
+                new UpdateTextCallback(delegate(string s) { lbl.Content = s; }),
+                new object[] { value });
+        }
+
+        public void ChangeEnable(object o, Boolean state)
+        {
+            ((Control)o).Dispatcher.Invoke(new OverallCallback(delegate() { ((Control)o).IsEnabled = state; }),
+                null);
         }
 
         private void lblClose_MouseUp(object sender, MouseButtonEventArgs e)
@@ -224,18 +241,44 @@ namespace ScammerAlert
             }
         }
 
-        private bool is64bitID(String value)
+       
+
+        public string getName(String id)
         {
-            if (((String)value).Length == 17)
+            if (!Utils.is64bitID(id))
+            {
+                id = Utils.GetCommunityID(id);
+            }
+
+            using (WebAPI.Interface steamFriedList = WebAPI.GetInterface("ISteamUser", "9DF293619722CA60815A3354C19DAB4F"))
             {
                 try
                 {
-                    Int64.Parse(((String)value), NumberStyles.None);
-                    return true;
+                    Dictionary<string, string> MyArgs = new Dictionary<string, string>();
+                    MyArgs["steamids"] = "[" + id + "]";
+                    KeyValue MyResult = steamFriedList.Call("GetPlayerSummaries", 2, MyArgs);
+
+                    return MyResult.Children[0].Children[0]["personaname"].Value;
                 }
-                catch { return false; }
+                catch (Exception e) { return null; }
             }
-            return false;
+        }
+
+        private void ValidateInput(string id)
+        {
+            Thread t1 = new Thread(new ThreadStart(delegate
+            {
+                string result = getName(id);
+                if (result != null)
+                {
+                    UpdateLableText(lblSteamName, result);
+                    ChangeEnable(btnSend, true);
+                }
+                else { ChangeEnable(btnSend, false); UpdateLableText(lblSteamName, "INVALID"); }
+
+
+            }));
+            t1.Start();
         }
 
 
@@ -290,9 +333,11 @@ namespace ScammerAlert
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            txtSteamID.GetBindingExpression(TextBox.TextProperty).UpdateSource();
             if (txtMotivation.Text.Length > 0 && IsValid(txtSteamID.Text))
             {
-                btnSend.IsEnabled = true;
+                ValidateInput(txtSteamID.Text);
+               
             }
             else
             {
@@ -302,21 +347,23 @@ namespace ScammerAlert
 
         private void txtSteamID_TextChanged(object sender, TextChangedEventArgs e)
         {
+            txtSteamID.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            
             if (txtMotivation.Text.Length > 0 && IsValid(txtSteamID.Text))
             {
-                btnSend.IsEnabled = true;
+                ValidateInput(txtSteamID.Text);
             }
             else
             {
+                ValidateInput(txtSteamID.Text);
                 btnSend.IsEnabled = false;
             }
         }
 
         private void txtSteamID_KeyDown(object sender, KeyEventArgs e)
         {
-            BindingExpression expression = txtSteamID.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty);
-            expression.UpdateSource();
-            btnSend.IsEnabled = IsValid(txtSteamID.Text);
+            txtSteamID.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+          //  btnSend.IsEnabled = IsValid(txtSteamID.Text);
 
             if (e.Key == Key.Enter)
             {
@@ -324,7 +371,7 @@ namespace ScammerAlert
                 if (IsValid(txtSteamID.Text))
                 {
                     String ID = "";
-                    if (is64bitID(txtSteamID.Text))
+                    if (Utils.is64bitID(txtSteamID.Text))
                     {
                         ID = Utils.GetSteamID(long.Parse(txtSteamID.Text));
                     }
@@ -332,14 +379,13 @@ namespace ScammerAlert
                     {
                         ID = txtSteamID.Text;
                     }
-                    SteamID id = new SteamID();
-                    id.SetFromString(ID, EUniverse.Public);
+                    //SteamID id = new SteamID();
+                    //id.SetFromString(ID, EUniverse.Public);
 
-                    steamFriends.RequestFriendInfo(id);
-                    ////steamFriends.RequestProfileInfo(id);
+                    //steamFriends.RequestFriendInfo(id);
+                    ValidateInput(ID);
+
                     reportThisID = txtSteamID.Text;
-
-
                 }
             }
 

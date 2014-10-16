@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -19,9 +20,27 @@ namespace ScammerAlert.converters
 
         public static string GetCommunityID(string steamID)
         {
-            Int64 authServer = Convert.ToInt64(steamID.Substring(8, 1));
-            Int64 authID = Convert.ToInt64(steamID.Substring(10));
-            return (76561197960265728 + (authID * 2) + authServer).ToString();
+            try
+            {
+                Int64 authServer = Convert.ToInt64(steamID.Substring(8, 1));
+                Int64 authID = Convert.ToInt64(steamID.Substring(10));
+                return (76561197960265728 + (authID * 2) + authServer).ToString();
+            }
+            catch (Exception e) { return null; }
+        }
+
+        public static bool is64bitID(String value)
+        {
+            if (((String)value).Length == 17)
+            {
+                try
+                {
+                    Int64.Parse(((String)value), NumberStyles.None);
+                    return true;
+                }
+                catch { return false; }
+            }
+            return false;
         }
 
     }

@@ -99,6 +99,7 @@
     <Compile Include="converters\FilenameToURLConverter.cs" />
     <Compile Include="converters\NumbToStringConverter.cs" />
     <Compile Include="converters\Utils.cs" />
+    <Compile Include="converters\ValidationErrorsToStringConverter.cs" />
     <Compile Include="ReportWindow.xaml.cs">
       <DependentUpon>ReportWindow.xaml</DependentUpon>
     </Compile>

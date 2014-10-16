@@ -8,6 +8,7 @@
         <SolidColorBrush x:Key="brushWatermarkForeground" Color="LightSteelBlue" />
         <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />
         <local:TextInputToVisibilityConverter x:Key="TextInputToVisibilityConverter" />
+        <local:ValidationErrorsToStringConverter x:Key="ValidationErrorConverter" />
 
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" 
                          Color="#FF302E2E"/>
@@ -30,7 +31,20 @@
                 </Border>
             </Grid>
         </DataTemplate>
-        
+
+        <ControlTemplate x:Key="TextBoxErrorTemplate" TargetType="Control">
+            <Grid ClipToBounds="False" >
+                <Image HorizontalAlignment="Right" VerticalAlignment="Top" 
+               Width="16" Height="16" Margin="0,-8,-8,0"  
+               ToolTip="{Binding ElementName=adornedElement, 
+                         Path=AdornedElement.(Validation.Errors), 
+                         Converter={StaticResource ValidationErrorConverter}}"/>
+                <Border BorderBrush="Red" BorderThickness="1" Margin="-1">
+                    <AdornedElementPlaceholder Name="adornedElement" />
+                </Border>
+            </Grid>
+        </ControlTemplate>
+
     </Window.Resources>
     <Border Background="#FF3F3F46" >
         <Grid>
@@ -50,7 +64,18 @@
                             </MultiBinding>
                         </TextBlock.Visibility>
                     </TextBlock>
-                    <TextBox Name="txtSteamID" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" TextChanged="txtSteamID_TextChanged" KeyDown="txtSteamID_KeyDown"  >
+                    <TextBox Name="txtSteamID" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}"  TextChanged="txtSteamID_TextChanged" KeyDown="txtSteamID_KeyDown"  >
+                        <TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}">
+                                <Style.Triggers>
+                                    <Trigger Property="Validation.HasError" Value="true">
+                                        <Setter Property="ToolTip"
+                                             Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                                           Path=(Validation.Errors), Converter={StaticResource ValidationErrorConverter}}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
                         <Binding RelativeSource="{RelativeSource Self}" Path="Text" UpdateSourceTrigger="Explicit" ValidatesOnDataErrors="True" ValidatesOnExceptions="True" >
                             <Binding.ValidationRules>
                                 <local:SteamIDValidation/>
