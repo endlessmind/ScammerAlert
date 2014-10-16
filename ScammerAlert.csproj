@@ -98,11 +98,15 @@
     <Compile Include="connection\file.cs" />
     <Compile Include="converters\FilenameToURLConverter.cs" />
     <Compile Include="converters\NumbToStringConverter.cs" />
+    <Compile Include="converters\Utils.cs" />
     <Compile Include="ReportWindow.xaml.cs">
       <DependentUpon>ReportWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScammerWindow.xaml.cs">
       <DependentUpon>ScammerWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ScanPublicFriendlist.xaml.cs">
+      <DependentUpon>ScanPublicFriendlist.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -126,6 +130,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ScammerWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ScanPublicFriendlist.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

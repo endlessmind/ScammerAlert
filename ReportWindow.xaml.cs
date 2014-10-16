@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.IO;
 using ScammerAlert.connection;
+using ScammerAlert.converters;
 using SteamKit2;
 using System.Threading;
 using System.Net;
@@ -202,7 +203,19 @@ namespace ScammerAlert
                     }
                     else { return false; }
                 }
-                else { return false; }
+                else
+                {
+                    if (((String)value).Length == 17)
+                    {
+                        try
+                        {
+                            Int64.Parse(((String)value), NumberStyles.None);
+                            return true;
+                        }
+                        catch { return false; }
+                    }
+                    return false;
+                }
             }
             catch (Exception e1)
             {
@@ -210,6 +223,21 @@ namespace ScammerAlert
                 return false;
             }
         }
+
+        private bool is64bitID(String value)
+        {
+            if (((String)value).Length == 17)
+            {
+                try
+                {
+                    Int64.Parse(((String)value), NumberStyles.None);
+                    return true;
+                }
+                catch { return false; }
+            }
+            return false;
+        }
+
 
         private void btnAddImage_Click(object sender, RoutedEventArgs e)
         {
@@ -295,8 +323,17 @@ namespace ScammerAlert
 
                 if (IsValid(txtSteamID.Text))
                 {
+                    String ID = "";
+                    if (is64bitID(txtSteamID.Text))
+                    {
+                        ID = Utils.GetSteamID(long.Parse(txtSteamID.Text));
+                    }
+                    else
+                    {
+                        ID = txtSteamID.Text;
+                    }
                     SteamID id = new SteamID();
-                    id.SetFromString(txtSteamID.Text, EUniverse.Public);
+                    id.SetFromString(ID, EUniverse.Public);
 
                     steamFriends.RequestFriendInfo(id);
                     ////steamFriends.RequestProfileInfo(id);

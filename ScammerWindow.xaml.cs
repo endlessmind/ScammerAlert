@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ScammerAlert.connection;
 using SteamKit2;
+using ScammerAlert.converters;
+using System.Threading;
 
 namespace ScammerAlert
 {
@@ -107,6 +109,19 @@ namespace ScammerAlert
             return baseURL + extendedUrL; ;
         }
 
+        public string[] getAvatarAndName(String id) {
+            using (WebAPI.Interface steamFriedList = WebAPI.GetInterface("ISteamUser", "9DF293619722CA60815A3354C19DAB4F"))
+            {
+                Dictionary<string, string> MyArgs = new Dictionary<string, string>();
+                MyArgs["steamids"] = "[" + Utils.GetCommunityID(id) + "]";
+                KeyValue MyResult = steamFriedList.Call("GetPlayerSummaries", 2, MyArgs);
+                string[] values = new string[2];
+                values[0] = MyResult.Children[0].Children[0]["personaname"].Value;
+                values[1] = MyResult.Children[0].Children[0]["avatarfull"].Value;
+                return values;
+            }
+        }
+
         public void OnPersonaState(SteamFriends.PersonaStateCallback callback)
         {
             //Oh no no no. When using ObserableCollections, we need to perform all and any changes on UI Thread!
@@ -139,7 +154,13 @@ namespace ScammerAlert
                 {
                     SteamID id = new SteamID();
                     id.SetFromString(reports[i].SteamID, EUniverse.Public);
-                    main.GetFriendInfo(id);
+
+                    //main.GetFriendInfo(id); //Not used right now, because this requires the user to login and get the communication token.
+                    //But if we want to check the friendlist without logging in, then we won't get the communication token, so we'll have to use and other function
+                    //To get the current Nickname and profile pic of the "reporter" (see thread @ 181)
+
+
+
                     if (i < reports.Count)
                     {
                         reports[i].Attachment = sql.getAttachment(reports[i].ID, false);
@@ -148,10 +169,25 @@ namespace ScammerAlert
                     {
                         reports[i].Attachment = sql.getAttachment(reports[i].ID, true);
                     }
+                    Console.WriteLine(reports[i].ID);
+                    Console.WriteLine(reports[i].Attachment.Count > 0 ? reports[i].Attachment[0].ReportID + "" : "null");
+                    Console.WriteLine("//");
                 }
 
                 MotivationGrid.Visibility = System.Windows.Visibility.Visible;
                 lbMotivation.ItemsSource = reports;
+
+
+                Thread t1 = new Thread(new ThreadStart(delegate
+                 {
+                     foreach (report r in lbMotivation.ItemsSource)
+                     {
+                         string[] values = getAvatarAndName(r.SteamID);
+                         r.Name = values[0];
+                         r.AvatarURL = values[1]; 
+                     }
+                 }));
+                t1.Start();
             }
         }
 

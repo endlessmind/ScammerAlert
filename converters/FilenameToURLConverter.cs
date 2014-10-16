@@ -15,7 +15,7 @@ namespace ScammerAlert.converters
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            Console.WriteLine(value);
+            //Console.WriteLine(value);
             string strVal = value.ToString();
 
             WebClient client = new WebClient();

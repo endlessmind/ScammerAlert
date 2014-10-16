@@ -82,12 +82,12 @@
             </Grid>
 
 
-            <Button x:Name="btnLogin" Content="Sign in" HorizontalAlignment="Center" Margin="0,245,0,0" VerticalAlignment="Top" Width="120" Height="30" FontWeight="Bold" FontSize="14" Click="Button_Click"/>
-            <Button Content="Report scammer offline" HorizontalAlignment="Center" Margin="0,0,0,8" VerticalAlignment="Bottom" Width="150" Height="20" Padding="1,-1,1,1" Click="Button_Click_4"/>
+                    <Button x:Name="btnLogin" Content="Sign in" HorizontalAlignment="Center" Margin="47,229,48,0" VerticalAlignment="Top" Width="120" Height="30" FontWeight="Bold" FontSize="14" Click="Button_Click"/>
+                    <Button Content="Report scammer offline" HorizontalAlignment="Center" Margin="33,0,32,35" VerticalAlignment="Bottom" Width="150" Height="20" Padding="1,-1,1,1" Click="Button_Click_4"/>
+                    <Button Content="Scan friendlist from steamid" HorizontalAlignment="Center" Margin="25,0,25,8" VerticalAlignment="Bottom" Width="170" Height="20" Padding="1,-1,1,1" Click="Button_Click_5" />
 
 
-
-        </Grid>
+                </Grid>
 
         <Grid x:Name="ReportGrid" Height="170"  VerticalAlignment="Bottom" Background="#FF302E2E"  Visibility="Collapsed"  >
             <Label Content="Report scammer" HorizontalAlignment="Center" Margin="0,5,0,0" VerticalAlignment="Top" />
